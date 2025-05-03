@@ -3,11 +3,11 @@ import React, { useState } from "react";
 import SwaggerLoaderComponent from "@/components/swaggerloader";
 import { parse } from "yaml";
 import { GenAIFunction } from "@/utils";
+import AiInteraction from "@/components/aiinteraction";
 
 export default function Home() {
   const [fileContent, setFileContent] = useState<any>(""); // Changed state type to 'any'
   const [isSwagger, setIsSwagger] = useState(false);
-  const [userPrompt, setUserPrompt] = useState("");
 
   const handleFileChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -50,12 +50,10 @@ export default function Home() {
               (parsedContent.openapi &&
                 /^3(\.\d+)*$/.test(parsedContent.openapi)))
           ) {
-            console.log(parsedContent, "Valid Swagger/OpenAPI file");
             setIsSwagger(true);
             try {
               const genAIResponse = await GenAIFunction({
                 fileContent: parsedContent,
-                userPrompt: userPrompt,
               });
               setFileContent(genAIResponse);
             } catch (e) {
@@ -72,6 +70,19 @@ export default function Home() {
     }
   };
 
+  if (typeof window !== "undefined") {
+    const { innerWidth, innerHeight } = window;
+    if (innerWidth < 1200 || innerHeight < 760) {
+      return (
+        <div className="w-screen h-screen flex items-center justify-center bg-green-100">
+          <p className="text-xl font-bold text-green-900">
+            Shift to a bigger screen
+          </p>
+        </div>
+      );
+    }
+  }
+
   return (
     <div className="w-screen h-screen flex bg-green-100 pt-20 px-24 pb-4 gap-4">
       <div className="rounded-lg border-2 border-green-900 w-8/12 h-full p-5">
@@ -82,7 +93,10 @@ export default function Home() {
         />
       </div>
       <div className="rounded-lg border-2 border-green-900 w-4/12 h-full p-5">
-        {/* You can display AI output or other information here */}
+        <AiInteraction
+          fileContent={fileContent}
+          setFileContent={setFileContent}
+        />
       </div>
     </div>
   );

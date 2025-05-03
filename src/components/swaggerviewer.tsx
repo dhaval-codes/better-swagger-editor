@@ -10,34 +10,12 @@ export default function SwaggerViewer({ swaggerdata }: { swaggerdata: any }) {
         >
           {Object.entries(methods as Record<string, any>).map(
             ([method, details]) => (
-              <div key={method} className="space-y-4 mb-6">
-                <div className="flex justify-between items-start mb-0">
-                  <div>
-                    <h2 className="text-lg font-bold text-green-600">
-                      [{method.toUpperCase()}] {endpoint}
-                    </h2>
-                  </div>
-                  <p className="text-sm text-gray-600 max-w-md text-right">
-                    {details.description}
-                  </p>
-                </div>
-
-                {["pathParams", "queryParams", "headerParams", "fields"].map(
-                  (paramType) =>
-                    details[paramType] && (
-                      <div key={paramType}>
-                        <h4 className="text-md font-semibold text-green-800">
-                          {paramType.replace("Params", "").toUpperCase()}
-                        </h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-2">
-                          {details[paramType].map((param: any) => (
-                            <CheckboxInputPair key={param.name} param={param} />
-                          ))}
-                        </div>
-                      </div>
-                    )
-                )}
-              </div>
+              <SwaggerMethodBlock
+                key={method}
+                endpoint={endpoint}
+                method={method}
+                details={details}
+              />
             )
           )}
         </div>
@@ -46,24 +24,89 @@ export default function SwaggerViewer({ swaggerdata }: { swaggerdata: any }) {
   );
 }
 
+function SwaggerMethodBlock({
+  endpoint,
+  method,
+  details,
+}: {
+  endpoint: string;
+  method: string;
+  details: any;
+}) {
+  const [showResponse, setShowResponse] = useState(false);
+
+  return (
+    <div className="space-y-4 mb-6">
+      <div className="flex justify-between items-start mb-0">
+        <div>
+          <h2 className="text-lg font-bold text-green-600">
+            [{method.toUpperCase()}] {endpoint}
+          </h2>
+        </div>
+        <p className="text-sm text-gray-600 max-w-md text-right">
+          {details.description}
+        </p>
+      </div>
+
+      {["pathParams", "queryParams", "headerParams", "fields"].map(
+        (paramType) =>
+          details[paramType] && (
+            <div key={paramType}>
+              <h4 className="text-md font-semibold text-green-800">
+                {paramType.replace("Params", "").toUpperCase()}
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-2">
+                {details[paramType].map((param: any) => (
+                  <CheckboxInputPair key={param.name} param={param} />
+                ))}
+              </div>
+            </div>
+          )
+      )}
+
+      {details.response && (
+        <div className="text-right">
+          <button
+            onClick={() => setShowResponse((prev) => !prev)}
+            className="focus:outline-none text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-xs px-2.5 py-2.5"
+          >
+            {showResponse ? "Hide Response" : "Show Response"}
+          </button>
+        </div>
+      )}
+
+      {showResponse && details.response && (
+        <pre className="mt-2 rounded bg-gray-100 p-4 text-xs overflow-auto">
+          {JSON.stringify(details.response, null, 2)}
+        </pre>
+      )}
+    </div>
+  );
+}
+
 // Component for checkbox + input binding
 function CheckboxInputPair({ param }: { param: any }) {
-  const [checked, setChecked] = useState(true);
+  const [checked, setChecked] = useState(param.required ? true : true);
+
+  const isRequired = param.required;
 
   return (
     <div className="flex items-start gap-2">
       <input
         type="checkbox"
         checked={checked}
+        disabled={isRequired}
         onChange={(e) => setChecked(e.target.checked)}
-        className="mt-1 accent-green-500"
+        className={`mt-1 accent-green-500 ${
+          isRequired ? "opacity-50 cursor-not-allowed" : ""
+        }`}
       />
       <div className="flex flex-col w-full">
         <label className="text-sm font-medium">
           {param.name}{" "}
           <span className="text-gray-500">
             ({param.type || "unknown"}
-            {param.required ? ", required" : ""})
+            {isRequired ? ", required" : ""})
           </span>
         </label>
         {renderInput(param, !checked)}
