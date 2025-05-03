@@ -242,7 +242,7 @@ function extractJsonFromCodeBlock(responseText: string): object {
 }
 
 const ai = new GoogleGenAI({
-  apiKey: "AIzaSyDCHmKc0jtQfXnidzntgA-7BwAasMqKgQU",
+  apiKey: process.env.NEXT_PUBLIC_GOOGLE_GEMINI_API_KEY,
 });
 
 export async function GenAIFunction({

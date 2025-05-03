@@ -1,6 +1,8 @@
 "use client";
 
 export default function AppHeader() {
+  // console.log(process.env.NEXT_PUBLIC_GOOGLE_GEMINI_API_KEY, "Google Env");
+
   return (
     <div className="w-screen h-16 bg-green-500 py-5 px-24 absolute flex flex-row items-center justify-between cursor-pointer">
       <span className="text-base text-green-900 font-medium">
